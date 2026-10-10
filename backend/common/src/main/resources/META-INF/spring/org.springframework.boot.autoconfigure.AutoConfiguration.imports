@@ -1,0 +1,2 @@
+com.aeon.common.config.CommonWebAutoConfiguration
+com.aeon.common.config.JwtAutoConfiguration

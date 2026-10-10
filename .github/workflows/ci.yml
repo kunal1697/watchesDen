@@ -1,0 +1,129 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  checks: write
+  packages: write
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: Backend · build, unit & integration tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+      - name: Build + unit tests (surefire) + integration tests (failsafe) + coverage (jacoco)
+        run: mvn -B verify
+      - name: Publish test report
+        if: always()
+        uses: mikepenz/action-junit-report@v4
+        with:
+          report_paths: |
+            backend/**/target/surefire-reports/TEST-*.xml
+            backend/**/target/failsafe-reports/TEST-*.xml
+          check_name: Backend tests
+          detailed_summary: true
+      - name: Upload test & coverage reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-reports
+          path: |
+            backend/**/target/surefire-reports/
+            backend/**/target/failsafe-reports/
+            backend/**/target/site/jacoco/
+
+  frontend:
+    name: Frontend · tests & build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci --no-audit --no-fund
+      - name: Unit / component tests
+        run: npx vitest run --coverage --reporter=default --reporter=junit --outputFile.junit=test-results/junit.xml
+      - name: Publish test report
+        if: always()
+        uses: mikepenz/action-junit-report@v4
+        with:
+          report_paths: frontend/test-results/junit.xml
+          check_name: Frontend tests
+      - run: npm run build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: frontend/dist
+
+  e2e:
+    name: Docker · full-stack functional tests (Newman)
+    needs: [backend, frontend]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build images
+        run: docker compose build
+      - name: Start stack
+        run: docker compose up -d
+      - name: Wait for the gateway to be healthy
+        run: |
+          for i in $(seq 1 60); do
+            if curl -fs http://localhost:8080/actuator/health | grep -q UP && \
+               curl -fs http://localhost:8080/api/products > /dev/null; then
+              echo "Gateway is up"; exit 0
+            fi
+            sleep 5
+          done
+          docker compose ps; docker compose logs --tail=80; exit 1
+      - name: Run Postman collection
+        run: |
+          mkdir -p newman
+          npx --yes newman@6 run postman/WatchesDen.postman_collection.json \
+            -e postman/WatchesDen.local.postman_environment.json \
+            --reporters cli,junit --reporter-junit-export newman/results.xml
+      - name: Publish functional test report
+        if: always()
+        uses: mikepenz/action-junit-report@v4
+        with:
+          report_paths: newman/results.xml
+          check_name: Functional tests (Newman)
+      - name: Dump logs on failure
+        if: failure()
+        run: docker compose logs --tail=200
+      - name: Push images to GHCR
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+          OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          for s in discovery-server api-gateway user-service product-service order-service frontend; do
+            docker tag watchesden/$s ghcr.io/$OWNER/watchesden-$s:${{ github.sha }}
+            docker tag watchesden/$s ghcr.io/$OWNER/watchesden-$s:latest
+            docker push ghcr.io/$OWNER/watchesden-$s:${{ github.sha }}
+            docker push ghcr.io/$OWNER/watchesden-$s:latest
+          done
+      - name: Stop stack
+        if: always()
+        run: docker compose down -v

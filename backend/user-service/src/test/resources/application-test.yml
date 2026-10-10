@@ -1,0 +1,11 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:users;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1
+    username: sa
+    password:
+eureka:
+  client:
+    enabled: false
+aeon:
+  jwt:
+    secret: test-secret-key-that-is-at-least-32-bytes-long!

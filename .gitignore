@@ -1,0 +1,22 @@
+# Java / Maven
+target/
+*.class
+*.log
+
+# Node
+node_modules/
+dist/
+coverage/
+test-results/
+
+# Newman
+newman/
+
+# IDE / OS
+.idea/
+*.iml
+.vscode/
+.DS_Store
+
+# Env
+.env
