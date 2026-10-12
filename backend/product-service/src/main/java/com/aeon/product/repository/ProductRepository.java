@@ -17,10 +17,7 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
     @Query("select distinct p.collection from Product p where p.active = true order by p.collection")
     List<String> findActiveCollections();
 
-    /**
-     * Atomic, race-free stock decrement: the WHERE clause guarantees stock never goes negative even
-     * when many checkouts hit the same product concurrently. Returns 1 on success, 0 if not enough stock.
-     */
+    // returns 0 if there is not enough stock
     @Modifying
     @Query("update Product p set p.stock = p.stock - :qty, p.version = p.version + 1"
             + " where p.id = :id and p.active = true and p.stock >= :qty")

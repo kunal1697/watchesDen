@@ -17,7 +17,6 @@ import java.time.Duration;
 @Configuration
 public class OrderConfig {
 
-    /** Eureka-aware client: {@code http://product-service} resolves to a live instance. */
     @Bean
     @LoadBalanced
     public RestTemplate productRestTemplate(RestTemplateBuilder builder,

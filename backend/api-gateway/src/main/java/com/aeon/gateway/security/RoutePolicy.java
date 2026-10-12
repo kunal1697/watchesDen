@@ -5,9 +5,6 @@ import org.springframework.util.AntPathMatcher;
 
 import java.util.List;
 
-/**
- * Decides which requests may pass the gateway without a token, and which need the ADMIN role.
- */
 public final class RoutePolicy {
 
     private static final AntPathMatcher MATCHER = new AntPathMatcher();

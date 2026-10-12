@@ -8,9 +8,6 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
 
-/**
- * order-service's view of product-service's internal inventory API.
- */
 public interface ProductClient {
 
     @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
@@ -140,10 +137,8 @@ public interface ProductClient {
         }
     }
 
-    /** Prices lines without reserving stock; result order matches request order. */
     List<PricedLine> quote(List<LineRequest> lines);
 
-    /** Reserves stock for every line or throws; nothing is reserved on failure. */
     List<PricedLine> reserve(List<LineRequest> lines);
 
     void release(List<ReleaseLine> lines);

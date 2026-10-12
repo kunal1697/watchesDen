@@ -21,10 +21,6 @@ import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-/**
- * Translates exceptions into the shared {@link ApiError} shape. Registered automatically
- * in every servlet-based service through {@code CommonWebAutoConfiguration}.
- */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 

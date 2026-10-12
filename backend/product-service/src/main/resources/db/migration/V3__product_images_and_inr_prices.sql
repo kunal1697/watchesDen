@@ -1,4 +1,4 @@
--- Product photography (Unsplash, free licence) and prices in Indian Rupees.
+-- add images and change prices to INR
 ALTER TABLE products ADD COLUMN image_url VARCHAR(500);
 ALTER TABLE products ADD COLUMN hover_image_url VARCHAR(500);
 

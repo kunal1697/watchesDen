@@ -7,10 +7,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * Stores customization option ids as a sorted, comma-separated string so equal selections
- * compare equal in SQL (used to merge identical cart lines).
- */
 @Converter
 public class OptionIdsConverter implements AttributeConverter<List<String>, String> {
 

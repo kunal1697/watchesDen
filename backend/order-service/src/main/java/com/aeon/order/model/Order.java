@@ -66,7 +66,6 @@ public class Order {
     @OrderBy("id")
     private List<OrderItem> items = new ArrayList<>();
 
-    /** Guards admin status changes racing a customer cancellation. */
     @Version
     private long version;
 

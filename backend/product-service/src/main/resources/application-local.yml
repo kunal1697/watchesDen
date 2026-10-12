@@ -1,5 +1,4 @@
-# No-Docker / no-PostgreSQL profile: an embedded H2 database stored on disk.
-# Activate with --spring.profiles.active=local (the run-local scripts do this).
+# run without postgres: --spring.profiles.active=local
 spring:
   datasource:
     url: jdbc:h2:file:${AEON_DATA_DIR:${user.home}/.watchesden}/products;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;AUTO_SERVER=TRUE

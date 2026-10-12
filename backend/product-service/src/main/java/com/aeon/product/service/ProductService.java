@@ -70,7 +70,7 @@ public class ProductService {
         return new CustomizationCatalog(grouped);
     }
 
-    // ---- Admin ----
+    // admin
 
     @Transactional(readOnly = true)
     public PageResponse<ProductResponse> adminList(Pageable pageable) {
@@ -94,7 +94,6 @@ public class ProductService {
         return ProductResponse.from(products.saveAndFlush(p));
     }
 
-    /** Soft delete: keeps historic orders' references valid, hides the product from the catalog. */
     @Transactional
     public void delete(Long id) {
         Product p = products.findById(id).orElseThrow(() -> new ResourceNotFoundException("Product", id));

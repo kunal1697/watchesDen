@@ -43,7 +43,7 @@ public class CartService {
 
     @Transactional
     public CartResponse add(Long userId, AddItemRequest req) {
-        // Validates product existence, customizability and option ids before persisting anything.
+        // check the product and options are valid before saving
         PricedLine priced = productClient.quote(List.of(new LineRequest(req.productId(), req.quantity(),
                 req.optionIds() == null ? List.of() : req.optionIds()))).get(0);
         if (!priced.available()) {

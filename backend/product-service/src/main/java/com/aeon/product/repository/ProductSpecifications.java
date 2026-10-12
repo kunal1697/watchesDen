@@ -6,9 +6,6 @@ import org.springframework.data.jpa.domain.Specification;
 import java.math.BigDecimal;
 import java.util.Locale;
 
-/**
- * Composable filters for the catalog search endpoint. A null argument means "no filter".
- */
 public final class ProductSpecifications {
 
     private ProductSpecifications() {

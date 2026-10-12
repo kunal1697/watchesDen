@@ -25,7 +25,7 @@ h1 {
   margin-top: 5px;
 }
 
-/* ---------- Navbar ---------- */
+/* navbar */
 .navbar {
   display: flex;
   align-items: center;
@@ -56,7 +56,7 @@ h1 {
   margin-right: 10px;
 }
 
-/* ---------- Buttons ---------- */
+/* buttons */
 button,
 .button {
   display: inline-block;
@@ -98,7 +98,7 @@ button.danger:hover {
   background-color: #b52b27;
 }
 
-/* ---------- Forms ---------- */
+/* forms */
 input,
 select,
 textarea {
@@ -197,7 +197,7 @@ textarea {
   gap: 20px;
 }
 
-/* ---------- Products ---------- */
+/* products */
 .grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -253,7 +253,7 @@ textarea {
   vertical-align: middle;
 }
 
-/* ---------- Tables ---------- */
+/* tables */
 .table {
   width: 100%;
   border-collapse: collapse;
@@ -317,7 +317,7 @@ textarea {
   background-color: #d9534f;
 }
 
-/* ---------- Toast & footer ---------- */
+/* toast & footer */
 .toast-stack {
   position: fixed;
   top: 70px;
@@ -349,7 +349,7 @@ textarea {
   color: #777;
 }
 
-/* ---------- Mobile ---------- */
+/* mobile */
 @media (max-width: 800px) {
   .grid {
     grid-template-columns: repeat(2, 1fr);

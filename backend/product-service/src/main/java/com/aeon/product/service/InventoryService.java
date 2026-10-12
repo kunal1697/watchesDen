@@ -25,10 +25,6 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-/**
- * Prices cart lines (base price + customization deltas) and reserves stock for checkout.
- * Reservation is all-or-nothing: one transaction, rolled back if any line lacks stock.
- */
 @Service
 public class InventoryService {
 
@@ -42,7 +38,6 @@ public class InventoryService {
         this.options = options;
     }
 
-    /** Prices lines without touching stock. Lines for removed products come back as unavailable. */
     @Transactional(readOnly = true)
     public List<ReservedLine> quote(List<ReserveItem> items) {
         Map<String, CustomizationOption> optionIndex = optionIndex();
@@ -57,7 +52,7 @@ public class InventoryService {
     public ReserveResponse reserve(ReserveRequest request) {
         Map<String, CustomizationOption> optionIndex = optionIndex();
         List<ReservedLine> lines = new ArrayList<>();
-        // Lock rows in a consistent order to avoid deadlocks between concurrent checkouts.
+        // sort by id so two checkouts don't lock rows in different order
         List<ReserveItem> ordered = request.items().stream()
                 .sorted(Comparator.comparing(ReserveItem::productId)).collect(Collectors.toList());
         for (ReserveItem item : ordered) {
@@ -73,7 +68,6 @@ public class InventoryService {
         return new ReserveResponse(lines);
     }
 
-    /** Compensation: returns stock when an order is cancelled or a checkout fails after reservation. */
     @Transactional
     public void release(ReleaseRequest request) {
         request.items().forEach(i -> products.incrementStock(i.productId(), i.quantity()));

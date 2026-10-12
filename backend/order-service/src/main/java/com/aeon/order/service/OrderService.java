@@ -34,15 +34,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * Checkout is a small saga across two services:
- * <ol>
- *   <li>reserve stock in product-service (all-or-nothing, outside our DB transaction);</li>
- *   <li>persist the order and clear the cart in one local transaction;</li>
- *   <li>if step 2 fails, compensate by releasing the reserved stock.</li>
- * </ol>
- * An optional {@code Idempotency-Key} makes client retries safe: the same key returns the same order.
- */
 @Service
 public class OrderService {
 
@@ -98,7 +89,7 @@ public class OrderService {
             return placed;
         } catch (DataIntegrityViolationException e) {
             compensate(reserved);
-            // Lost a race with a concurrent request carrying the same idempotency key.
+            // same idempotency key was used by another request at the same time
             if (key != null) {
                 OrderResponse winner = existing(userId, key);
                 if (winner != null) {
@@ -130,7 +121,7 @@ public class OrderService {
         return cancelled;
     }
 
-    // ---- Admin ----
+    // admin
 
     @Transactional(readOnly = true)
     public PageResponse<OrderResponse> adminList(OrderStatus status, Pageable pageable) {
@@ -148,7 +139,6 @@ public class OrderService {
         return updated;
     }
 
-    /** @param ownerId when non-null, the order must belong to this user. */
     private OrderResponse transition(Long orderId, OrderStatus next, Long ownerId) {
         try {
             return tx.execute(status -> {
@@ -184,7 +174,7 @@ public class OrderService {
         try {
             productClient.release(lines.stream().map(l -> new ReleaseLine(l.productId(), l.quantity())).collect(Collectors.toList()));
         } catch (RuntimeException e) {
-            // Stock stays reserved; flagged for manual reconciliation (outbox in ROADMAP.md).
+            // TODO: retry later, for now just log it
             log.error("COMPENSATION FAILED - stock not released for {}: {}", lines, e.getMessage());
         }
     }

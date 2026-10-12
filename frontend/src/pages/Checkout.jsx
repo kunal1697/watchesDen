@@ -11,7 +11,7 @@ export default function Checkout() {
   const { cart, reset } = useCart();
   const toast = useToast();
   const navigate = useNavigate();
-  // Same key is re-sent if the user clicks twice, so the backend never creates two orders.
+  // send same key on double click so only one order is created
   const idempotencyKey = useRef(uuid());
   const [form, setForm] = useState({ fullName: user?.fullName ?? '', addressLine: '', city: '', postalCode: '', country: 'India' });
   const [paymentMethod, setPaymentMethod] = useState('CARD');
@@ -38,7 +38,7 @@ export default function Checkout() {
       toast(`Order placed successfully! Order no: ${order.orderNumber}`, 'success');
       navigate('/orders');
     } catch (err) {
-      // Show the validation errors returned by the backend next to each field.
+      // show field errors from backend
       const fe = {};
       Object.entries(err.fieldErrors ?? {}).forEach(([k, msg]) => (fe[k.replace('shipping.', '')] = msg));
       setErrors(fe);

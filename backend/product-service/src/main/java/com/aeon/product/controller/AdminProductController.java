@@ -27,7 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/admin/products")
-@Tag(name = "Admin · Products", description = "Basic CRUD for the catalog (ADMIN role)")
+@Tag(name = "Admin Products", description = "Add, edit and delete products (admin only)")
 @SecurityRequirement(name = "bearer")
 public class AdminProductController {
 

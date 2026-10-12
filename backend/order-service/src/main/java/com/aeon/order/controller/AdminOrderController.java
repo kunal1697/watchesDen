@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/admin/orders")
-@Tag(name = "Admin · Orders", description = "Order fulfilment (ADMIN role)")
+@Tag(name = "Admin Orders", description = "Manage orders (admin only)")
 @SecurityRequirement(name = "bearer")
 public class AdminOrderController {
 
@@ -46,7 +46,7 @@ public class AdminOrderController {
     }
 
     @PatchMapping("/{orderId}/status")
-    @Operation(summary = "Advance order status (PLACED → CONFIRMED → SHIPPED → DELIVERED, or CANCELLED)")
+    @Operation(summary = "Advance order status (PLACED, CONFIRMED, SHIPPED, DELIVERED or CANCELLED)")
     public OrderResponse updateStatus(@Parameter(hidden = true) @RequestHeader(value = AuthHeaders.USER_ROLE, required = false) String role,
                                       @PathVariable Long orderId, @Valid @RequestBody StatusUpdateRequest request) {
         AuthHeaders.requireAdmin(role);

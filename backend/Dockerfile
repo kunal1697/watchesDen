@@ -1,13 +1,12 @@
-# One Dockerfile for every Spring Boot module. Build with:
-#   docker build --build-arg SERVICE=user-service -t aeon/user-service ./backend
+# usage: docker build --build-arg SERVICE=user-service ./backend
 ARG SERVICE
 
-# ---------- build ----------
+# build
 FROM maven:3.9-eclipse-temurin-11 AS build
 ARG SERVICE
 WORKDIR /src
 
-# Resolve dependencies first so they are cached between source-only changes.
+# download dependencies first
 COPY pom.xml .
 COPY common/pom.xml common/
 COPY discovery-server/pom.xml discovery-server/
@@ -21,7 +20,7 @@ COPY . .
 RUN mvn -B -q -pl ${SERVICE} -am package -DskipTests \
  && cp ${SERVICE}/target/${SERVICE}-*.jar /app.jar
 
-# ---------- runtime ----------
+# run
 FROM eclipse-temurin:11-jre-alpine
 RUN addgroup -S aeon && adduser -S aeon -G aeon
 USER aeon

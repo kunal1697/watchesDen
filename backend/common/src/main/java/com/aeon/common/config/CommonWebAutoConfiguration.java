@@ -9,10 +9,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.Ordered;
 
-/**
- * Wires the shared exception handler and correlation-id logging into every servlet service.
- * Not active in the reactive API gateway.
- */
 @AutoConfiguration
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 @Import(GlobalExceptionHandler.class)

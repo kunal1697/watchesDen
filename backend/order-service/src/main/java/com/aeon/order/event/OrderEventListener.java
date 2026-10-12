@@ -6,9 +6,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
-/**
- * Fires only after the order transaction commits, so no notification is ever sent for a rolled-back order.
- */
 @Component
 public class OrderEventListener {
 

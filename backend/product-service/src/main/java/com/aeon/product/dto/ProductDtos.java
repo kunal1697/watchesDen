@@ -229,7 +229,6 @@ public final class ProductDtos {
         public BigDecimal priceDelta() { return priceDelta; }
     }
 
-    /** Options grouped by part: CASE, DIAL, STRAP, HANDS. */
     @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
     public static final class CustomizationCatalog {
         private final Map<String, List<OptionResponse>> parts;

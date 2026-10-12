@@ -25,7 +25,6 @@ public class UserConfig {
         return new BCryptPasswordEncoder();
     }
 
-    /** Seeds the first admin account so the admin console is usable out of the box. */
     @Bean
     public ApplicationRunner adminSeeder(UserRepository users, PasswordEncoder encoder,
                                          @Value("${aeon.admin.email}") String email,

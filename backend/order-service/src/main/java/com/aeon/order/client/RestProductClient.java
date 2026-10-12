@@ -23,11 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
-/**
- * HTTP implementation over a load-balanced {@link RestTemplate} (Eureka resolves {@code product-service}).
- * Downstream 4xx errors are re-thrown with the same status and message so the customer sees e.g.
- * "Insufficient stock for Nebula Drift"; outages become 503.
- */
 @Component
 public class RestProductClient implements ProductClient {
 
@@ -94,7 +89,7 @@ public class RestProductClient implements ProductClient {
                 message = node.get("message").asText();
             }
         } catch (IOException ignored) {
-            // keep default message
+            // use default message
         }
         if (status.is5xxServerError()) {
             log.error("product-service returned {}: {}", status.value(), message);

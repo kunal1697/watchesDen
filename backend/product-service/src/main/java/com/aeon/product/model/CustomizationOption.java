@@ -9,9 +9,6 @@ import javax.persistence.Table;
 
 import java.math.BigDecimal;
 
-/**
- * One selectable part in the watch configurator, e.g. "Titanium case" or "Aurora dial".
- */
 @Entity
 @Table(name = "customization_options")
 public class CustomizationOption {

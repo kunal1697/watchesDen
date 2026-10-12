@@ -14,10 +14,6 @@ import javax.persistence.Table;
 import java.math.BigDecimal;
 import java.util.List;
 
-/**
- * Snapshot of a purchased line: name and price are copied at checkout so later catalog
- * edits never change historic orders.
- */
 @Entity
 @Table(name = "order_items")
 public class OrderItem {

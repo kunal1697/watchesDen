@@ -5,9 +5,6 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import java.time.Instant;
 import java.util.Map;
 
-/**
- * Uniform error body returned by every microservice.
- */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public final class ApiError {
 

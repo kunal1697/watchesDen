@@ -8,7 +8,7 @@ afterEach(() => {
   localStorage.clear();
 });
 
-// jsdom lacks these browser APIs used by the animation layer.
+// mocks for jsdom
 window.matchMedia =
   window.matchMedia ||
   ((query) => ({
@@ -31,6 +31,6 @@ class IO {
 window.IntersectionObserver = window.IntersectionObserver || IO;
 window.scrollTo = () => {};
 
-// jsdom has no media playback.
+// jsdom does not support video
 window.HTMLMediaElement.prototype.play = () => Promise.resolve();
 window.HTMLMediaElement.prototype.pause = () => {};

@@ -29,7 +29,7 @@ spring:
           uri: lb://order-service
           predicates:
             - Path=/api/cart/**,/api/cart,/api/orders/**,/api/orders,/api/admin/orders/**,/api/admin/orders
-        # OpenAPI specs of each service, re-exposed so the gateway Swagger UI can aggregate them
+        # swagger docs of each service
         - id: user-service-docs
           uri: lb://user-service
           predicates:

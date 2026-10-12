@@ -48,7 +48,6 @@ public class Product {
     @Column(name = "water_resistance_m", nullable = false)
     private int waterResistanceM;
 
-    /** Hex colours used by the frontend to render the watch as live SVG. */
     @Column(name = "case_color", nullable = false)
     private String caseColor;
 
@@ -73,7 +72,6 @@ public class Product {
     @Column(nullable = false)
     private boolean active = true;
 
-    /** Optimistic locking for admin edits racing each other. */
     @Version
     private long version;
 

@@ -9,9 +9,6 @@ import org.springframework.context.annotation.Bean;
 
 import java.time.Duration;
 
-/**
- * Provides a {@link JwtService} to any service (or the gateway) that sets {@code aeon.jwt.secret}.
- */
 @AutoConfiguration
 @ConditionalOnProperty("aeon.jwt.secret")
 public class JwtAutoConfiguration {

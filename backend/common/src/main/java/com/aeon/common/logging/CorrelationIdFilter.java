@@ -12,10 +12,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.UUID;
 
-/**
- * Propagates the {@code X-Correlation-Id} header (set by the API gateway) into the logging MDC
- * so a single request can be traced across every microservice log line.
- */
 public class CorrelationIdFilter extends OncePerRequestFilter {
 
     public static final String HEADER = CorrelationId.HEADER;

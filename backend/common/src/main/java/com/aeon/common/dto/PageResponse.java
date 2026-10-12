@@ -6,9 +6,6 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-/**
- * Stable pagination envelope so clients don't depend on Spring Data's Page JSON layout.
- */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public final class PageResponse<T> {
 

@@ -56,9 +56,6 @@ public final class OrderDtos {
         public String country() { return country; }
     }
 
-    /**
-     * Payment is simulated: no card data is ever collected or stored.
-     */
     @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
     public static final class CheckoutRequest {
         @NotNull @Valid

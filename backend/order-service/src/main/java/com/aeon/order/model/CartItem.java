@@ -1,5 +1,5 @@
 package com.aeon.order.model;
-// key mapping for optionIds list to a single string in the database
+
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;

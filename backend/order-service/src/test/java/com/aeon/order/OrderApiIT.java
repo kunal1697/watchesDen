@@ -29,9 +29,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-/**
- * Integration test of the order-service HTTP + persistence layers; product-service is stubbed.
- */
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
@@ -84,7 +81,7 @@ class OrderApiIT {
         long orderId = json.readTree(order).get("id").asLong();
         String orderNumber = json.readTree(order).get("orderNumber").asText();
 
-        // Retry with the same key returns the same order and does not reserve again.
+        // same key again should give the same order
         mvc.perform(post("/api/orders/checkout").header("X-User-Id", user)
                         .header("Idempotency-Key", "journey-1")
                         .contentType(MediaType.APPLICATION_JSON).content(CHECKOUT))

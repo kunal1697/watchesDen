@@ -24,10 +24,6 @@ import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
-/**
- * Validates the bearer token on every request, strips spoofed identity headers, and forwards the
- * authenticated identity to downstream services as {@code X-User-*} headers.
- */
 @Component
 public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 

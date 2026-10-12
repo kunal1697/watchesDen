@@ -15,13 +15,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-/**
- * Service-to-service API used by order-service. The gateway has no route to /internal/**,
- * so it is only reachable on the private Docker network.
- */
 @RestController
 @RequestMapping("/internal/inventory")
-@Tag(name = "Internal · Inventory", description = "Service-to-service only; not exposed by the gateway")
+@Tag(name = "Inventory", description = "Used by order-service")
 public class InventoryController {
 
     private final InventoryService service;

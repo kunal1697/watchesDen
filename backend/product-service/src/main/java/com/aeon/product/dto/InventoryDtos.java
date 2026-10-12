@@ -13,9 +13,6 @@ import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
 
-/**
- * Internal contract between order-service and product-service. Not routed by the gateway.
- */
 public final class InventoryDtos {
 
     private InventoryDtos() {
@@ -131,7 +128,6 @@ public final class InventoryDtos {
         public List<ReleaseItem> items() { return items; }
     }
 
-    /** Price quote without reserving stock — used to show live cart totals. */
     @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
     public static final class QuoteResponse {
         private final List<ReservedLine> lines;

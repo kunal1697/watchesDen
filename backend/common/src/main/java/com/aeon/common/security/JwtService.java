@@ -12,9 +12,6 @@ import java.time.Instant;
 import java.util.Date;
 import java.util.Optional;
 
-/**
- * Issues and verifies HS256 JWTs. Used by user-service (issue) and the API gateway (verify).
- */
 public class JwtService {
 
     private final SecretKey key;
@@ -40,7 +37,6 @@ public class JwtService {
                 .compact();
     }
 
-    /** Returns the authenticated principal, or empty if the token is invalid or expired. */
     public Optional<AuthUser> verify(String token) {
         try {
             Claims c = Jwts.parser().verifyWith(key).build().parseSignedClaims(token).getPayload();

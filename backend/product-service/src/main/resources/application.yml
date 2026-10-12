@@ -20,7 +20,6 @@ spring:
         max-page-size: 50
 
 springdoc:
-  # Service-to-service endpoints are not reachable through the gateway, so keep them out of the public spec.
   paths-to-exclude: /internal/**
 
 eureka:

@@ -23,7 +23,7 @@ export const tokenStore = {
       if (token) localStorage.setItem(TOKEN_KEY, token);
       else localStorage.removeItem(TOKEN_KEY);
     } catch {
-      /* storage unavailable: session stays in memory only */
+      // localStorage not available
     }
   },
 };
@@ -33,9 +33,6 @@ export function setUnauthorizedHandler(fn) {
   onUnauthorized = fn;
 }
 
-/**
- * Thin fetch wrapper: JSON in/out, bearer token, uniform ApiError from the backend error body.
- */
 export async function request(path, { method = 'GET', body, headers = {}, auth = true } = {}) {
   const h = { Accept: 'application/json', ...headers };
   if (body !== undefined) h['Content-Type'] = 'application/json';

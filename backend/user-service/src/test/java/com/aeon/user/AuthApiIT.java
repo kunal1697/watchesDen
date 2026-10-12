@@ -16,9 +16,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-/**
- * Integration test: full Spring context + Flyway schema on H2 (PostgreSQL mode) + real HTTP layer.
- */
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
