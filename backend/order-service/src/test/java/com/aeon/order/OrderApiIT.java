@@ -16,6 +16,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.times;
@@ -36,9 +37,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles("test")
 class OrderApiIT {
 
-    private static final String CHECKOUT = """
-            {"shipping":{"fullName":"Ada","addressLine":"1 Loop St","city":"London","postalCode":"NW1 6XE","country":"UK"},
-             "paymentMethod":"CARD"}""";
+    private static final String CHECKOUT =
+            "{\"shipping\":{\"fullName\":\"Ada\",\"addressLine\":\"1 Loop St\",\"city\":\"London\",\"postalCode\":\"NW1 6XE\",\"country\":\"UK\"},"
+            + "\"paymentMethod\":\"CARD\"}";
 
     @Autowired
     private MockMvc mvc;
@@ -156,6 +157,6 @@ class OrderApiIT {
 
     private static List<PricedLine> priced(List<LineRequest> lines) {
         return lines.stream().map(l -> new PricedLine(l.productId(), "Watch " + l.productId(), l.quantity(),
-                new BigDecimal("250.00"), l.optionIds(), null, true)).toList();
+                new BigDecimal("250.00"), l.optionIds(), null, true)).collect(Collectors.toList());
     }
 }

@@ -22,9 +22,8 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
      * when many checkouts hit the same product concurrently. Returns 1 on success, 0 if not enough stock.
      */
     @Modifying
-    @Query("""
-            update Product p set p.stock = p.stock - :qty, p.version = p.version + 1
-            where p.id = :id and p.active = true and p.stock >= :qty""")
+    @Query("update Product p set p.stock = p.stock - :qty, p.version = p.version + 1"
+            + " where p.id = :id and p.active = true and p.stock >= :qty")
     int decrementStock(@Param("id") Long id, @Param("qty") int qty);
 
     @Modifying

@@ -1,6 +1,7 @@
 package com.aeon.product.service;
 
 import com.aeon.common.exception.ResourceNotFoundException;
+import com.aeon.product.dto.ProductDtos;
 import com.aeon.product.dto.ProductDtos.ProductRequest;
 import com.aeon.product.dto.ProductDtos.ProductResponse;
 import com.aeon.product.model.CustomizationOption;
@@ -83,7 +84,7 @@ class ProductServiceTest {
                 new CustomizationOption("c2", Part.CASE, "Ti", "#BBBBBB", BigDecimal.TEN, 2),
                 new CustomizationOption("d1", Part.DIAL, "Void", "#000000", BigDecimal.ZERO, 1)));
 
-        var catalog = service.customizations();
+        ProductDtos.CustomizationCatalog catalog = service.customizations();
 
         assertThat(catalog.parts()).containsOnlyKeys("CASE", "DIAL");
         assertThat(catalog.parts().get("CASE")).hasSize(2);

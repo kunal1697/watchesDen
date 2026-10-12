@@ -2,23 +2,29 @@ package com.aeon.order.client;
 
 import com.aeon.common.exception.BusinessException;
 import com.aeon.common.logging.CorrelationId;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
-import org.springframework.http.HttpStatusCode;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.ResourceAccessException;
-import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
 /**
- * HTTP implementation over a load-balanced {@link RestClient} (Eureka resolves {@code product-service}).
+ * HTTP implementation over a load-balanced {@link RestTemplate} (Eureka resolves {@code product-service}).
  * Downstream 4xx errors are re-thrown with the same status and message so the customer sees e.g.
  * "Insufficient stock for Nebula Drift"; outages become 503.
  */
@@ -27,63 +33,64 @@ public class RestProductClient implements ProductClient {
 
     private static final Logger log = LoggerFactory.getLogger(RestProductClient.class);
 
-    private final RestClient http;
+    private final RestTemplate http;
     private final ObjectMapper json;
 
-    public RestProductClient(RestClient productRestClient, ObjectMapper json) {
-        this.http = productRestClient;
+    public RestProductClient(RestTemplate productRestTemplate, ObjectMapper json) {
+        this.http = productRestTemplate;
         this.json = json;
     }
 
-    private record Lines(List<PricedLine> lines) {
+    private static final class Lines {
+        private final List<PricedLine> lines;
+
+        @JsonCreator
+        Lines(@JsonProperty("lines") List<PricedLine> lines) {
+            this.lines = lines;
+        }
+
+        List<PricedLine> lines() {
+            return lines == null ? Collections.emptyList() : lines;
+        }
     }
 
     @Override
     public List<PricedLine> quote(List<LineRequest> lines) {
-        return call(() -> post("/internal/inventory/quote", lines).body(Lines.class)).lines();
+        return call(() -> http.postForObject("/internal/inventory/quote", request(lines), Lines.class)).lines();
     }
 
     @Override
     public List<PricedLine> reserve(List<LineRequest> lines) {
-        return call(() -> post("/internal/inventory/reserve", lines).body(Lines.class)).lines();
+        return call(() -> http.postForObject("/internal/inventory/reserve", request(lines), Lines.class)).lines();
     }
 
     @Override
     public void release(List<ReleaseLine> lines) {
-        call(() -> http.post().uri("/internal/inventory/release")
-                .header(CorrelationId.HEADER, correlationId())
-                .body(Map.of("items", lines))
-                .retrieve()
-                .onStatus(HttpStatusCode::isError, (req, res) -> {
-                    throw downstream(res.getStatusCode(), res.getBody().readAllBytes());
-                })
-                .toBodilessEntity());
+        call(() -> http.postForEntity("/internal/inventory/release", request(lines), Void.class));
     }
 
-    private RestClient.ResponseSpec post(String path, List<LineRequest> lines) {
-        return http.post().uri(path)
-                .header(CorrelationId.HEADER, correlationId())
-                .body(Map.of("items", lines))
-                .retrieve()
-                .onStatus(HttpStatusCode::isError, (req, res) -> {
-                    throw downstream(res.getStatusCode(), res.getBody().readAllBytes());
-                });
+    private static HttpEntity<Map<String, Object>> request(List<?> lines) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.set(CorrelationId.HEADER, correlationId());
+        return new HttpEntity<>(Collections.singletonMap("items", lines), headers);
     }
 
     private <T> T call(Supplier<T> s) {
         try {
             return s.get();
+        } catch (HttpStatusCodeException e) {
+            throw downstream(e.getStatusCode(), e.getResponseBodyAsByteArray());
         } catch (ResourceAccessException e) {
             log.error("product-service unreachable: {}", e.getMessage());
             throw new BusinessException(503, "Product service is temporarily unavailable");
         }
     }
 
-    private BusinessException downstream(HttpStatusCode status, byte[] body) {
+    private BusinessException downstream(HttpStatus status, byte[] body) {
         String message = "Product service error";
         try {
             JsonNode node = json.readTree(body);
-            if (node.hasNonNull("message")) {
+            if (node != null && node.hasNonNull("message")) {
                 message = node.get("message").asText();
             }
         } catch (IOException ignored) {

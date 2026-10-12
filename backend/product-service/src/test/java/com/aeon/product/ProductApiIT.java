@@ -36,11 +36,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles("test")
 class ProductApiIT {
 
-    private static final String NEW_PRODUCT = """
-            {"name":"Orbit One","collection":"Orbit","description":"Test watch","price":499.00,"stock":4,
-             "caseMaterial":"Steel","movement":"Quartz","diameterMm":38,"waterResistanceM":50,
-             "caseColor":"#AAAAAA","dialColor":"#000000","strapColor":"#111111","accentColor":"#00FFFF",
-             "customizable":true}""";
+    private static final String NEW_PRODUCT =
+            "{\"name\":\"Orbit One\",\"collection\":\"Orbit\",\"description\":\"Test watch\",\"price\":499.00,\"stock\":4,"
+            + "\"caseMaterial\":\"Steel\",\"movement\":\"Quartz\",\"diameterMm\":38,\"waterResistanceM\":50,"
+            + "\"caseColor\":\"#AAAAAA\",\"dialColor\":\"#000000\",\"strapColor\":\"#111111\",\"accentColor\":\"#00FFFF\","
+            + "\"customizable\":true}";
 
     @Autowired
     private MockMvc mvc;
@@ -133,8 +133,7 @@ class ProductApiIT {
     @Test
     void reserveIsAllOrNothing() throws Exception {
         int stockBefore = products.findById(3L).orElseThrow().getStock();
-        String body = """
-                {"items":[{"productId":3,"quantity":1},{"productId":10,"quantity":10}]}""";
+        String body = "{\"items\":[{\"productId\":3,\"quantity\":1},{\"productId\":10,\"quantity\":10}]}";
 
         mvc.perform(post("/internal/inventory/reserve").contentType(MediaType.APPLICATION_JSON).content(body))
                 .andExpect(status().isConflict());

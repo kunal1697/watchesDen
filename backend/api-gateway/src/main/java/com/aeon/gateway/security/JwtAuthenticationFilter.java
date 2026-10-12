@@ -85,10 +85,10 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         response.setStatusCode(status);
         response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
         response.getHeaders().set(CorrelationId.HEADER, correlationId);
-        String body = """
-                {"timestamp":"%s","status":%d,"error":"%s","message":"%s","path":"%s","correlationId":"%s"}"""
-                .formatted(Instant.now(), status.value(), status.getReasonPhrase(), message,
-                        exchange.getRequest().getPath().value(), correlationId);
+        String body = String.format(
+                "{\"timestamp\":\"%s\",\"status\":%d,\"error\":\"%s\",\"message\":\"%s\",\"path\":\"%s\",\"correlationId\":\"%s\"}",
+                Instant.now(), status.value(), status.getReasonPhrase(), message,
+                exchange.getRequest().getPath().value(), correlationId);
         DataBuffer buffer = response.bufferFactory().wrap(body.getBytes(StandardCharsets.UTF_8));
         return response.writeWith(Mono.just(buffer));
     }

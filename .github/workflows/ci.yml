@@ -27,7 +27,7 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '17'
+          java-version: '11'
           cache: maven
       - name: Build + unit tests (surefire) + integration tests (failsafe) + coverage (jacoco)
         run: mvn -B verify

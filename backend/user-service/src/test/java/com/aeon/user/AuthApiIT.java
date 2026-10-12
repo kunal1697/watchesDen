@@ -31,8 +31,7 @@ class AuthApiIT {
 
     @Test
     void registerLoginAndFetchProfile() throws Exception {
-        String register = """
-                {"fullName":"Grace Hopper","email":"grace@watchesden.com","password":"Cobol1959"}""";
+        String register = "{\"fullName\":\"Grace Hopper\",\"email\":\"grace@watchesden.com\",\"password\":\"Cobol1959\"}";
         mvc.perform(post("/api/auth/register").contentType(MediaType.APPLICATION_JSON).content(register))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.token").isNotEmpty())
@@ -51,8 +50,7 @@ class AuthApiIT {
 
     @Test
     void duplicateRegistrationIsConflict() throws Exception {
-        String register = """
-                {"fullName":"Dup","email":"dup@watchesden.com","password":"Passw0rd!"}""";
+        String register = "{\"fullName\":\"Dup\",\"email\":\"dup@watchesden.com\",\"password\":\"Passw0rd!\"}";
         mvc.perform(post("/api/auth/register").contentType(MediaType.APPLICATION_JSON).content(register))
                 .andExpect(status().isCreated());
         mvc.perform(post("/api/auth/register").contentType(MediaType.APPLICATION_JSON).content(register))

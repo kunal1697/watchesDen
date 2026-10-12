@@ -6,29 +6,26 @@ import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.client.SimpleClientHttpRequestFactory;
-import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestTemplate;
+
+import java.time.Duration;
 
 @Configuration
 public class OrderConfig {
 
-    /** Eureka-aware builder: {@code http://product-service} resolves to a live instance. */
+    /** Eureka-aware client: {@code http://product-service} resolves to a live instance. */
     @Bean
     @LoadBalanced
-    public RestClient.Builder loadBalancedRestClientBuilder() {
-        return RestClient.builder();
-    }
-
-    @Bean
-    public RestClient productRestClient(RestClient.Builder loadBalancedRestClientBuilder,
-                                       @Value("${aeon.product-service.url:http://product-service}") String baseUrl) {
-        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
-        factory.setConnectTimeout(2_000);
-        factory.setReadTimeout(5_000);
-        return loadBalancedRestClientBuilder.baseUrl(baseUrl).requestFactory(factory).build();
+    public RestTemplate productRestTemplate(RestTemplateBuilder builder,
+                                           @Value("${aeon.product-service.url:http://product-service}") String baseUrl) {
+        return builder.rootUri(baseUrl)
+                .setConnectTimeout(Duration.ofSeconds(2))
+                .setReadTimeout(Duration.ofSeconds(5))
+                .build();
     }
 
     @Bean

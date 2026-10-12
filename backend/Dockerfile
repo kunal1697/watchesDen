@@ -3,7 +3,7 @@
 ARG SERVICE
 
 # ---------- build ----------
-FROM maven:3.9-eclipse-temurin-17 AS build
+FROM maven:3.9-eclipse-temurin-11 AS build
 ARG SERVICE
 WORKDIR /src
 
@@ -22,7 +22,7 @@ RUN mvn -B -q -pl ${SERVICE} -am package -DskipTests \
  && cp ${SERVICE}/target/${SERVICE}-*.jar /app.jar
 
 # ---------- runtime ----------
-FROM eclipse-temurin:17-jre-alpine
+FROM eclipse-temurin:11-jre-alpine
 RUN addgroup -S aeon && adduser -S aeon -G aeon
 USER aeon
 WORKDIR /app

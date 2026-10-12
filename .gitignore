@@ -20,3 +20,6 @@ newman/
 
 # Env
 .env
+
+# Local run logs
+logs/

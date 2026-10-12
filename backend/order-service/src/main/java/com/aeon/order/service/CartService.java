@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class CartService {
@@ -98,7 +99,7 @@ public class CartService {
             return new CartResponse(List.of(), 0, BigDecimal.ZERO);
         }
         List<PricedLine> priced = productClient.quote(items.stream()
-                .map(i -> new LineRequest(i.getProductId(), i.getQuantity(), i.getOptionIds())).toList());
+                .map(i -> new LineRequest(i.getProductId(), i.getQuantity(), i.getOptionIds())).collect(Collectors.toList()));
         List<CartLine> lines = new ArrayList<>();
         BigDecimal subtotal = BigDecimal.ZERO;
         int count = 0;

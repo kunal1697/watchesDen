@@ -57,7 +57,7 @@ flowchart LR
   end
 ```
 
-- **MVC** in every service: `controller` → `service` → `repository` → `model`, with DTO records at the boundary.
+- **MVC** in every service: `controller` → `service` → `repository` → `model`, with immutable DTOs at the boundary.
 - **`common`** is the shared library that connects the services: error model + global exception handler, JWT issue/verify,
   identity-header contract (`X-User-Id`, `X-User-Role`), correlation-ID logging filter, pagination envelope. It is wired in
   through Spring Boot auto-configuration, so each service gets it by adding one dependency.
@@ -70,7 +70,7 @@ Full design rationale, sequence diagrams and data model: [docs/TECHNICAL_DOC.md]
 
 ```
 watch-website/
-├── backend/                     Maven multi-module (Java 17, Spring Boot 3.3, Spring Cloud 2023)
+├── backend/                     Maven multi-module (Java 11, Spring Boot 2.7, Spring Cloud 2021)
 │   ├── common/                  shared library (exceptions, JWT, headers, logging, auto-config)
 │   ├── discovery-server/        Eureka registry
 │   ├── api-gateway/             Spring Cloud Gateway + JWT filter + aggregated Swagger
@@ -90,6 +90,7 @@ watch-website/
 ├── docs/                        TECHNICAL_DOC.md, TEST_RESULTS.md
 ├── .github/workflows/ci.yml     CI/CD pipeline
 ├── docker-compose.yml
+├── run-local.sh / run-local.bat  start the backend without Docker (H2 databases)
 └── ROADMAP.md
 ```
 
@@ -106,9 +107,24 @@ docker compose up --build        # first build takes a few minutes (Maven + npm 
 Open http://localhost:3000. Services start in dependency order using health checks.
 Stop with `docker compose down` (add `-v` to wipe the database).
 
-### Option B — Run locally without Docker
+### Option B — Run locally without Docker or PostgreSQL (quickest)
 
-Prerequisites: JDK 17+, Maven 3.9+, Node 20+, PostgreSQL 14+.
+Prerequisites: **JDK 11+** and Node 18+. Maven is not needed: the bundled wrapper (`backend/mvnw`) downloads it.
+The `local` Spring profile swaps PostgreSQL for embedded H2 databases stored in `~/.watchesden`
+(override with `AEON_DATA_DIR`). Flyway runs the same migrations, so the catalog is seeded on first start.
+
+```bash
+./run-local.sh                 # macOS / Linux: builds on first run, starts all 5 services; Ctrl+C stops them
+run-local.bat                  # Windows: opens one window per service
+
+cd frontend && npm install && npm run dev      # http://localhost:3000
+```
+
+Logs go to `logs/<service>.log` (shell script). Delete `~/.watchesden` to reset the data.
+
+### Option C — Run locally with PostgreSQL
+
+Prerequisites: JDK 11+, Node 18+, PostgreSQL 14+.
 
 ```bash
 # 1. databases
@@ -117,7 +133,7 @@ psql -U postgres -c "ALTER USER aeon CREATEDB;"
 psql -U aeon -d postgres -f db/init.sql
 
 # 2. backend (each in its own terminal, in this order)
-cd backend && mvn -q install -DskipTests
+cd backend && ./mvnw -q install -DskipTests
 java -jar discovery-server/target/discovery-server-1.0.0.jar
 java -jar user-service/target/user-service-1.0.0.jar
 java -jar product-service/target/product-service-1.0.0.jar
@@ -170,7 +186,7 @@ Errors share one shape: `{timestamp, status, error, message, path, correlationId
 
 ```bash
 # Backend: unit tests (surefire, *Test) + integration tests (failsafe, *IT) + JaCoCo coverage
-cd backend && mvn verify
+cd backend && ./mvnw verify
 #   reports: */target/surefire-reports, */target/failsafe-reports, */target/site/jacoco/index.html
 
 # Frontend: Vitest + Testing Library

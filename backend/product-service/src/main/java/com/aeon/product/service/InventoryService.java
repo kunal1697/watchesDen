@@ -50,7 +50,7 @@ public class InventoryService {
                         .map(p -> price(i, p, optionIndex))
                         .orElseGet(() -> new ReservedLine(i.productId(), "Unavailable product", i.quantity(),
                                 BigDecimal.ZERO, i.safeOptionIds(), null, false)))
-                .toList();
+                .collect(Collectors.toList());
     }
 
     @Transactional
@@ -59,7 +59,7 @@ public class InventoryService {
         List<ReservedLine> lines = new ArrayList<>();
         // Lock rows in a consistent order to avoid deadlocks between concurrent checkouts.
         List<ReserveItem> ordered = request.items().stream()
-                .sorted(Comparator.comparing(ReserveItem::productId)).toList();
+                .sorted(Comparator.comparing(ReserveItem::productId)).collect(Collectors.toList());
         for (ReserveItem item : ordered) {
             Product p = loadActive(item.productId());
             ReservedLine line = price(item, p, optionIndex);

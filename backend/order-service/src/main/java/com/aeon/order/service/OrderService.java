@@ -31,8 +31,8 @@ import java.security.SecureRandom;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.HexFormat;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Checkout is a small saga across two services:
@@ -67,7 +67,7 @@ public class OrderService {
     public OrderResponse checkout(Long userId, CheckoutRequest req, String idempotencyKey) {
         String key = (idempotencyKey == null || idempotencyKey.isBlank()) ? null : idempotencyKey.trim();
         if (key != null) {
-            var previous = existing(userId, key);
+            OrderResponse previous = existing(userId, key);
             if (previous != null) {
                 log.info("Idempotent replay of checkout key={} -> order {}", key, previous.orderNumber());
                 return previous;
@@ -80,7 +80,7 @@ public class OrderService {
         }
 
         List<PricedLine> reserved = productClient.reserve(items.stream()
-                .map(i -> new LineRequest(i.getProductId(), i.getQuantity(), i.getOptionIds())).toList());
+                .map(i -> new LineRequest(i.getProductId(), i.getQuantity(), i.getOptionIds())).collect(Collectors.toList()));
 
         try {
             OrderResponse placed = tx.execute(status -> {
@@ -100,7 +100,7 @@ public class OrderService {
             compensate(reserved);
             // Lost a race with a concurrent request carrying the same idempotency key.
             if (key != null) {
-                var winner = existing(userId, key);
+                OrderResponse winner = existing(userId, key);
                 if (winner != null) {
                     return winner;
                 }
@@ -126,7 +126,7 @@ public class OrderService {
         OrderResponse cancelled = transition(orderId, OrderStatus.CANCELLED, userId);
         compensate(cancelled.items().stream()
                 .map(i -> new PricedLine(i.productId(), i.productName(), i.quantity(), i.unitPrice(),
-                        i.optionIds(), i.customizationSummary(), true)).toList());
+                        i.optionIds(), i.customizationSummary(), true)).collect(Collectors.toList()));
         return cancelled;
     }
 
@@ -143,7 +143,7 @@ public class OrderService {
         if (next == OrderStatus.CANCELLED) {
             compensate(updated.items().stream()
                     .map(i -> new PricedLine(i.productId(), i.productName(), i.quantity(), i.unitPrice(),
-                            i.optionIds(), i.customizationSummary(), true)).toList());
+                            i.optionIds(), i.customizationSummary(), true)).collect(Collectors.toList()));
         }
         return updated;
     }
@@ -182,7 +182,7 @@ public class OrderService {
 
     private void compensate(List<PricedLine> lines) {
         try {
-            productClient.release(lines.stream().map(l -> new ReleaseLine(l.productId(), l.quantity())).toList());
+            productClient.release(lines.stream().map(l -> new ReleaseLine(l.productId(), l.quantity())).collect(Collectors.toList()));
         } catch (RuntimeException e) {
             // Stock stays reserved; flagged for manual reconciliation (outbox in ROADMAP.md).
             log.error("COMPENSATION FAILED - stock not released for {}: {}", lines, e.getMessage());
@@ -198,6 +198,6 @@ public class OrderService {
         byte[] b = new byte[3];
         RANDOM.nextBytes(b);
         return "WD-" + LocalDate.now().format(DateTimeFormatter.BASIC_ISO_DATE) + "-"
-                + HexFormat.of().withUpperCase().formatHex(b);
+                + String.format("%02X%02X%02X", b[0], b[1], b[2]);
     }
 }

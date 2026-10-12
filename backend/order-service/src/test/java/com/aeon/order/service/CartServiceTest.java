@@ -17,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -42,7 +43,7 @@ class CartServiceTest {
         lenient().when(productClient.quote(anyList())).thenAnswer(inv -> {
             List<LineRequest> lines = inv.getArgument(0);
             return lines.stream().map(l -> new PricedLine(l.productId(), "Watch", l.quantity(),
-                    new BigDecimal("100.00"), l.optionIds(), null, true)).toList();
+                    new BigDecimal("100.00"), l.optionIds(), null, true)).collect(Collectors.toList());
         });
     }
 

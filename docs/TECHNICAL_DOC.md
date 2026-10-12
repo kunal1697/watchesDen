@@ -39,14 +39,14 @@ stock return, idempotent checkout.
 
 | Layer | Technology | Version | Why |
 |---|---|---|---|
-| Language | Java | 17 (LTS) | Records, text blocks, long-term support |
-| Framework | Spring Boot | 3.3.4 | MVC, Data JPA, validation, actuator |
-| Microservice infra | Spring Cloud | 2023.0.3 | Gateway, Netflix Eureka, LoadBalancer |
-| API docs | springdoc-openapi | 2.6.0 | OpenAPI 3 + Swagger UI, aggregated at the gateway |
+| Language | Java | 11 (LTS) | Runs on the widest range of machines; long-term support |
+| Framework | Spring Boot | 2.7.18 | MVC, Data JPA, validation, actuator (last line supporting Java 11) |
+| Microservice infra | Spring Cloud | 2021.0.9 | Gateway, Netflix Eureka, LoadBalancer |
+| API docs | springdoc-openapi | 1.8.0 | OpenAPI 3 + Swagger UI, aggregated at the gateway |
 | Auth | jjwt | 0.12.6 | HS256 JWT issue/verify |
 | Passwords | spring-security-crypto | (Boot managed) | BCrypt without pulling in full Spring Security |
-| Database | PostgreSQL | 16 | Database-per-service |
-| Migrations | Flyway | 10 (Boot managed) | Versioned, repeatable schema per service |
+| Database | PostgreSQL | 16 | Database-per-service (embedded H2 with the `local` profile for Docker-free runs) |
+| Migrations | Flyway | 8.5 (Boot managed) | Versioned, repeatable schema per service |
 | Frontend | React | 18.3 | Component model, hooks |
 | Build tool | Vite | 5 | Fast dev server with API proxy |
 | Routing | React Router | 6 | Nested routes, protected routes |
@@ -114,13 +114,13 @@ com.aeon.<service>
 ├── service      business rules & transactions
 ├── repository   Spring Data JPA interfaces, specifications, atomic queries
 ├── model        JPA entities (the "M")
-├── dto          request/response records (the API "V" — JSON views of the model)
+├── dto          immutable request/response DTOs (the API "V" — JSON views of the model)
 ├── client       (order-service) typed client for another service
 ├── event        (order-service) domain events + listener
 └── config       beans, OpenAPI metadata
 ```
 
-Controllers never touch repositories; entities never leave the service layer (they are mapped to DTO records).
+Controllers never touch repositories; entities never leave the service layer (they are mapped to DTOs).
 
 ## 4. Request lifecycle
 
@@ -177,7 +177,7 @@ auto-configuration** (`META-INF/spring/...AutoConfiguration.imports`), so adding
 
 | Package | Provides |
 |---|---|
-| `exception` | `ApiException` hierarchy (`ResourceNotFoundException` 404, `BusinessException` 409/400, `UnauthorizedException` 401/403), `ApiError` record, `GlobalExceptionHandler` |
+| `exception` | `ApiException` hierarchy (`ResourceNotFoundException` 404, `BusinessException` 409/400, `UnauthorizedException` 401/403), `ApiError` body, `GlobalExceptionHandler` |
 | `security` | `JwtService` (issue/verify), `AuthUser`, `Roles`, `AuthHeaders` (header names + guards) |
 | `logging` | `CorrelationId` constants, `CorrelationIdFilter` (MDC + access log line per request) |
 | `dto` | `PageResponse<T>`: a stable pagination envelope instead of Spring's internal `Page` JSON |
@@ -475,7 +475,7 @@ writes coverage in `verify`. Results: [TEST_RESULTS.md](TEST_RESULTS.md).
 
 - **`backend/Dockerfile`** is a single multi-stage file for every module (`--build-arg SERVICE=…`). The build stage copies
   POMs first and resolves dependencies (a cached layer), then builds only the module and its dependencies (`-pl X -am`).
-  The runtime stage uses `eclipse-temurin:17-jre-alpine`, runs as a **non-root** user, and sets
+  The runtime stage uses `eclipse-temurin:11-jre-alpine`, runs as a **non-root** user, and sets
   `-XX:MaxRAMPercentage=75` for container-aware heap sizing.
 - **`frontend/Dockerfile`** builds with `node:20-alpine` and serves with `nginx:alpine`. `nginx.conf` sets SPA fallback,
   `/api` reverse proxy, gzip, and immutable caching for hashed assets.
@@ -489,7 +489,7 @@ writes coverage in `verify`. Results: [TEST_RESULTS.md](TEST_RESULTS.md).
 
 | Job | Steps | Output |
 |---|---|---|
-| `backend` | JDK 17 (Maven cache) → `mvn -B verify` | JUnit check run *Backend tests*; artifacts: surefire, failsafe, JaCoCo HTML |
+| `backend` | JDK 11 (Maven cache) → `mvn -B verify` | JUnit check run *Backend tests*; artifacts: surefire, failsafe, JaCoCo HTML |
 | `frontend` | Node 20 (npm cache) → `npm ci` → Vitest with coverage + JUnit → `vite build` | Check run *Frontend tests*; artifact: `dist` |
 | `e2e` (needs both) | `docker compose build` → `up -d` → wait for gateway health and catalog → **Newman** → JUnit report → logs on failure → push images to **GHCR** (main only, tagged `sha` and `latest`) → `down -v` | Check run *Functional tests (Newman)*; published images |
 
